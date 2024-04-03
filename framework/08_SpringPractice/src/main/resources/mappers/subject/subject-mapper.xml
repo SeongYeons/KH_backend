@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+	
+<mapper namespace="com.kh.practice.subject.model.mapper.SubjectMapper">
+	<resultMap id="subjectResultMap" type="Subject">
+		<id property="no" column="CLASS_NO"/>
+		<result property="deptNo" column="DEPARTMENT_NO"/>
+		<result property="preattendingNo" column="PREATTENDING_CLASS_NO"/>
+		<result property="name" column="CLASS_NAME"/>
+		<result property="type" column="CLASS_TYPE"/>
+	</resultMap>
+	
+	<resultMap id="subjectProfessorResultMap" type="SubjectProfessor">
+		<id property="classNo" column="CLASS_NO"/>
+		<id property="professorNo" column="PROFESSOR_NO"/>
+	</resultMap>
+
+	<select id="selectAllByDepartmentNo" parameterType="string"
+			resultMap="subjectResultMap">
+		SELECT CLASS_NO,
+		       DEPARTMENT_NO,
+		       PREATTENDING_CLASS_NO,
+		       CLASS_NAME,
+		       CLASS_TYPE
+		FROM TB_CLASS
+		WHERE DEPARTMENT_NO = #{deptNo}
+		ORDER BY CLASS_NAME ASC
+	</select>
+	
+	<select id="selectSubjectProfessor" parameterType="map"
+		resultMap="subjectProfessorResultMap">
+		SELECT CLASS_NO,
+		       PROFESSOR_NO
+		FROM TB_CLASS_PROFESSOR
+		WHERE CLASS_NO = #{classNo}
+		  AND PROFESSOR_NO = #{professorNo}
+	</select>
+	
+	<insert id="insertSubject" parameterType="Subject"
+		useGeneratedKeys="true" keyProperty="no" keyColumn="CLASS_NO">
+		INSERT INTO TB_CLASS(
+			CLASS_NO,
+			DEPARTMENT_NO,
+			PREATTENDING_CLASS_NO,
+			CLASS_NAME,
+			CLASS_TYPE
+		) VALUES (
+			'C' || TO_CHAR(ROUND(DBMS_RANDOM.VALUE(1, 10000000)), 'FM0000000'),
+			#{deptNo},
+			#{preattendingNo},
+			#{name},
+			#{type}
+		)
+	</insert>
+	
+	<insert id="insertClassAndProfessor" parameterType="map">
+		INSERT INTO TB_CLASS_PROFESSOR (
+			CLASS_NO,
+			PROFESSOR_NO
+		) VALUES (
+			#{classNo},
+			#{professorNo}
+		)
+	</insert>
+</mapper>

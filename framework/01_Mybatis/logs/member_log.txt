@@ -1,0 +1,16 @@
+[DEBUG] 2024-02-01 16:15:12.393 [main] mybatis.member.model.service.MemberServiceImpl getMemberCount - 회원 수 : 2 - 
+[INFO ] 2024-02-01 16:15:12.513 [main] mybatis.member.model.service.MemberServiceImpl findAll - findAll() - 호출 - 
+[DEBUG] 2024-02-01 16:15:12.578 [main] mybatis.member.model.service.MemberServiceImpl findMemberById - 아이디 : ismoon - 
+[DEBUG] 2024-02-01 16:15:12.643 [main] mybatis.member.model.service.MemberServiceImpl findMemberById - 아이디 : admin - 
+[DEBUG] 2024-02-01 16:15:12.711 [main] mybatis.member.model.service.MemberServiceImpl save - 사용자 번호 : 0, 사용자 이름: 임꺽정 - 
+[DEBUG] 2024-02-01 16:15:12.771 [main] mybatis.member.model.service.MemberServiceImpl save - 사용자 번호 : 0, 사용자 이름: 이몽룡 - 
+[DEBUG] 2024-02-01 16:15:12.823 [main] mybatis.member.model.service.MemberServiceImpl findMemberById - 아이디 : test1 - 
+[DEBUG] 2024-02-01 16:15:12.866 [main] mybatis.member.model.service.MemberServiceImpl save - 사용자 번호 : 63, 사용자 이름: 성춘향 - 
+[DEBUG] 2024-02-01 16:15:12.914 [main] mybatis.member.model.service.MemberServiceImpl findMemberById - 아이디 : test1 - 
+[DEBUG] 2024-02-01 16:15:12.963 [main] mybatis.member.model.service.MemberServiceImpl findMemberById - 아이디 : test2 - 
+[DEBUG] 2024-02-01 16:15:13.018 [main] mybatis.member.model.service.MemberServiceImpl save - 사용자 번호 : 64, 사용자 이름: 심청이 - 
+[DEBUG] 2024-02-01 16:15:13.061 [main] mybatis.member.model.service.MemberServiceImpl findMemberById - 아이디 : test2 - 
+[DEBUG] 2024-02-01 16:15:13.106 [main] mybatis.member.model.service.MemberServiceImpl findMemberById - 아이디 : test1 - 
+[DEBUG] 2024-02-01 16:15:13.180 [main] mybatis.member.model.service.MemberServiceImpl findMemberById - 아이디 : test1 - 
+[DEBUG] 2024-02-01 16:15:13.221 [main] mybatis.member.model.service.MemberServiceImpl findMemberById - 아이디 : test2 - 
+[DEBUG] 2024-02-01 16:15:13.300 [main] mybatis.member.model.service.MemberServiceImpl findMemberById - 아이디 : test2 - 

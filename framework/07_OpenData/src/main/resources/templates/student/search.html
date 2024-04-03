@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>학생 조회</title>
+<script th:src="@{/js/jquery-3.7.1.js}"></script>
+</head>
+<body>
+	<h2>학생 조회</h2>
+	
+	<label for="deptNo">학과 : </label>
+	<select id="deptNo">
+		<option selected value="">--------선택--------</option>
+		<option th:each="department : ${departments}"
+				th:value="${department.no}"
+				th:text="${department.name}"
+		></option>
+	</select>
+	
+	<label for="absenceYn">휴학 여부 : </label>
+	<select id="absenceYn">
+		<option value="">모두</option>
+		<option value="N">재학중</option>
+		<option value="Y">휴학중</option>
+	</select>
+	
+	<button id="btnSearch">검색</button>
+	
+	<p id="result"></p>
+	
+	<script>
+		$(document).ready(() => {
+			$("#btnSearch").on('click', () => {
+				let deptNo = $('#deptNo>option:selected').val();
+				let absenceYn = $('#absenceYn').val();
+					
+				$.getJSON('/students', {deptNo, absenceYn})
+				 .done((response) => {
+					 let result = '';
+					 let students = response.students;
+					 
+					 for (let i = 0; i < students.length; i++) {
+						 result += '학생 번호 : ' + students[i].no + 
+						 		   '<br>이름 : ' + students[i].name + 
+						 		   '<br>주소 : ' + students[i].address +
+						 		   '<br>주민 번호 : ' + students[i].ssn +
+						 		   '<br>입학 년도 : ' + (new Date(students[i].entranceDate).getYear() + 1900) + 
+						 		   '<br>휴학 여부 : ' + students[i].absenceYn + 
+						 		   '<br><button class="btnDelete" sno="' + students[i].no + '" >삭제</button>' + 
+ 							 	   // `<br><button class="btnDelete" sno="${students[i].no}" >삭제</button>` +
+						 		   '<br><br>';
+					 }
+					 
+					 $('#result').html(result);
+					 
+					 $('.btnDelete').on('click', (event) => {
+						 let sno = $(event.target).attr('sno');
+						 
+						 if (confirm('정말로 삭제하시겠습니까?')) {
+							$.ajax({
+								type: 'DELETE',
+								url: '/students/' + sno,
+								dataType: 'json',
+								success: (response) => {
+									console.log(response);
+									
+									if(response.resultCode > 0) {
+										alert('삭제 성공');
+										
+										$('#btnSearch').trigger('click');
+									} else {										
+										alert('삭제 실패');
+									}
+								}
+							}); 
+						 }						  
+					 });
+				 });
+			});
+		});
+	</script>
+</body>
+</html>

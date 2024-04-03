@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper 
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.kh.practice.professor.model.mapper.ProfessorMapper">
+	<resultMap id="professorResultMap" type="Professor">
+		<id property="no" column="PROFESSOR_NO"/>
+		<result property="name" column="PROFESSOR_NAME"/>
+		<result property="ssn" column="PROFESSOR_SSN"/>
+		<result property="address" column="PROFESSOR_ADDRESS"/>
+		<association property="department" columnPrefix="D_"
+			resultMap="com.kh.practice.department.model.mapper.DepartmentMapper.departmentResultMap"/>
+	</resultMap>
+	
+	<select id="selectProfessorByNo" 
+		parameterType="string" resultMap="professorResultMap">
+		SELECT TP.PROFESSOR_NO,
+		       TP.PROFESSOR_NAME,
+		       TP.PROFESSOR_SSN,
+		       TP.PROFESSOR_ADDRESS,
+		       TD.DEPARTMENT_NO AS "D_DEPARTMENT_NO",
+		       TD.DEPARTMENT_NAME AS "D_DEPARTMENT_NAME",
+		       TD.CATEGORY AS "D_CATEGORY",
+		       TD.OPEN_YN AS "D_OPEN_YN",
+		       TD.CAPACITY AS "D_CAPACITY"
+		FROM TB_PROFESSOR TP
+		LEFT OUTER JOIN TB_DEPARTMENT TD ON (TP.DEPARTMENT_NO = TD.DEPARTMENT_NO)
+		WHERE TP.PROFESSOR_NO = #{no}
+	</select>
+	
+	<select id="selectAllByDeptNo" parameterType="string" 
+				resultMap="professorResultMap">
+		SELECT PROFESSOR_NO,
+		       PROFESSOR_NAME,
+		       PROFESSOR_SSN,
+		       PROFESSOR_ADDRESS,
+		       DEPARTMENT_NO
+		FROM TB_PROFESSOR
+		WHERE DEPARTMENT_NO = #{deptNo}
+	</select>
+	
+	<insert id="insertProfessor" parameterType="Professor">
+		<selectKey resultType="string" keyProperty="no" order="BEFORE">
+			SELECT 'P' || TO_CHAR(SEQ_PROFESSOR_NO.NEXTVAL, 'FM000') AS PROFESSOR_NO
+			FROM DUAL
+		</selectKey>
+
+		INSERT INTO TB_PROFESSOR(
+			PROFESSOR_NO,
+			PROFESSOR_NAME,
+			PROFESSOR_SSN,
+			PROFESSOR_ADDRESS,
+			DEPARTMENT_NO
+		) VALUES (
+			#{no},
+			#{name},
+			#{ssn},
+			#{address},
+			#{departmentNo}
+		)
+	</insert>
+</mapper>

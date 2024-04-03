@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:c="http://www.springframework.org/schema/c"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+	<!--  
+	Owner hong = new Owner();
+	
+	hong.setName("홍길동");
+	hong.setAge(24);
+	hong.setPet(dog);
+	
+	<bean id="hong" class="com.kh.di.owner.Owner">
+		<property name="name" value="홍길동"/>
+		<property name="age" value="24"/>
+		<property name="pet" ref="dog"/>
+	</bean>
+	-->
+	<bean id="hong" class="com.kh.di.owner.Owner" 
+		primary="true" p:name="홍길동" p:age="24" p:pet-ref="dog"/>
+	
+	<!--  
+	Owner lee = new Owner("이몽룡", 22, cat);
+	
+	<bean id="lee" class="com.kh.di.owner.Owner">
+      <constructor-arg name="name" value="이몽룡" />
+      <constructor-arg name="age" value="22"/>
+      <constructor-arg name="pet" ref="cat"/>
+      
+      <constructor-arg index="0" value="이몽룡" />
+      <constructor-arg index="1" value="22"/>
+      <constructor-arg index="2" ref="cat"/>
+    </bean>
+    
+	<bean id="lee" class="com.kh.di.owner.Owner"
+		c:name="이몽룡" c:age="22" c:pet-ref="cat"/>
+	-->
+	
+	<bean id="lee" class="com.kh.di.owner.Owner"
+		c:_0="이몽룡" c:_1="24" c:_2-ref="cat"/>
+</beans>

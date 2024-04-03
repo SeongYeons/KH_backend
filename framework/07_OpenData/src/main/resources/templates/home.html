@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>스프링 부트 웹</title>
+</head>
+<body>
+	<h2>스프링 부트 웹</h2>
+	
+	<h3>1. 학생 조회(춘대학 활용)</h3>
+	<a th:href="@{/student/search}">View Details</a>
+	
+	<h3>2. 동네예보 데이터 조회</h3>
+	<a th:href="@{/weather/vilage}">View Details</a>
+	
+	<h3>3. 시군구별 관광기후지수 데이터 조회</h3>
+	<a th:href="@{/weather/city}">View Details</a>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>동네예보 데이터 조회</title>
+<script th:src="@{/js/jquery-3.7.1.js}"></script>
+</head>
+<body>
+	<h2>동네예보 데이터 조회</h2>
+	
+	<label for="courseId">코스명 : </label>
+	<select id="courseId">
+		<option th:each="course : ${courses}"
+				th:value="${course.courseId}"
+				th:text="${course.courseName}"
+		></option>
+	</select>
+	
+	<br><br>
+
+	<table border="1">
+		<thead>
+			<tr>
+				<th>관광지 이름</th>
+				<th>지역</th>
+				<th>테마</th>
+				<th>예보 시간</th>
+				<th>기온(일 3시간)</th>
+				<th>강수 확률</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td colspan="6">조회된 데이터가 없습니다.</td>
+			</tr>
+		</tbody>
+	</table>
+	
+	<br>
+	
+	<button id="prevPage">이전</button>
+	<span id="currentPage">0</span>/<span id="lastPage">0</span>
+	<button id="nextPage">다음</button>	
+	
+	<script>
+		function showList(pageNo, courseId) {				
+			console.log(`pageNo : ${pageNo}, courseId : ${courseId}`);
+			
+			$.getJSON('/weather/vilages', {pageNo, courseId})
+			 .done((data) => {
+				 let result = '';
+				 let {pageNo, numOfRows, totalCount, items} = data.response.body;
+				 let {item} = items;
+				 
+				 item.forEach((element) => {
+					 result += `<tr>
+					 				<td>${element.spotName}</td>
+					 				<td>${element.courseAreaName}</td>
+					 				<td>${element.thema}</td>
+					 				<td>${element.tm}</td>
+					 				<td>${element.th3}</td>
+					 				<td>${element.pop}</td>
+					 			</tr>`;
+				 });
+				 
+				 $('table>tbody').empty();
+				 $('table>tbody').append(result);
+				 $('#currentPage').text(pageNo);
+				 $('#lastPage').text(Math.ceil(totalCount / numOfRows));
+			 });
+		}
+	
+		$(document).ready(() => {
+			showList(1, $('#courseId').val());
+			
+			$('#courseId').on('change', (event) => {
+				showList(1, $(event.target).val());
+			});
+			
+			$('#prevPage').on('click', () => {
+				let prevPage = Number.parseInt($('#currentPage').text()) - 1;
+			
+				prevPage = prevPage > 0 ? prevPage : 1;
+				
+				console.log(`Prev Page : ${prevPage}`);
+				
+				showList(prevPage, $('#courseId').val());
+			});
+			
+			$('#nextPage').on('click', () => {
+				let nextPage = Number.parseInt($('#currentPage').text()) + 1;
+				let lastPage = Number.parseInt($('#lastPage').text());
+				
+				nextPage = nextPage > lastPage ? lastPage : nextPage;
+				
+				console.log(`Next Page : ${nextPage}`);
+				
+				showList(nextPage, $('#courseId').val());
+				
+			});
+			
+		});
+	</script>	
+	
+	<br><br><br><br><br><br><br>
+	<br><br><br><br><br><br><br>
+	<br><br><br><br><br><br><br>
+	<br><br><br><br><br><br><br>
+	<br><br><br><br><br><br><br>
+	<br><br><br><br><br><br><br>
+	<br><br><br><br><br><br><br>
+	<br><br><br><br><br><br><br>
+	<br><br><br><br><br><br><br>
+</body>
+</html>
