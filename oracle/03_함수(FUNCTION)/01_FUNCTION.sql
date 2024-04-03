@@ -1,0 +1,682 @@
+/*
+    <함수>
+      단일행 함수
+        - N 개의 값을 읽어서 N 개의 값을 반환한다.
+        - 매 행 함수 실행 결과를 반환한다.
+      그룹 함수
+        - N 개의 값을 읽어서 1 개의 값을 반환한다.
+        - 하나의 그룹별로 함수 실행 결과를 반환한다.
+        
+    <단일행 함수>
+    <문자 처리 함수>
+      1) LENGTH / LENGTHB
+         LENGTH(CHARACTER) : 글자 수 반환
+         LENGTHB(CHARACTER) : 글자의 바이트 수 반환
+         
+         영문자, 숫자, 특수문자 한 글자 -> 1BYTE
+         한글 한 글자 -> 3BYTE
+*/
+SELECT LENGTH('오라클'), LENGTHB('오라클') FROM DUAL;
+SELECT LENGTH('ORACLE'), LENGTHB('ORACLE') FROM DUAL;
+SELECT LENGTH('ORA클'), LENGTHB('ORA클') FROM DUAL;
+SELECT LENGTH('오 라 클'), LENGTHB('오 라 클') FROM DUAL;
+
+SELECT EMP_NAME, LENGTH(EMP_NAME), LENGTHB(EMP_NAME),
+       EMAIL, LENGTH(EMAIL), LENGTHB(EMAIL)
+FROM EMPLOYEE;
+
+/*
+      2) INSTR
+         INSTR(CHARACTER, CHARACTER[, POSITION, OCCURRENCE])
+*/
+SELECT INSTR('AABAACAABBAA', 'B') FROM DUAL; -- 3번째 자리 B
+SELECT INSTR('AABAACAABBAA', 'D') FROM DUAL; -- 0
+SELECT INSTR('AABAACAABBAA', 'B', 1) FROM DUAL; -- 3번째 자리 B
+SELECT INSTR('AABAACAABBAA', 'B', 4) FROM DUAL; -- 9번째 자리 B
+SELECT INSTR('AABAACAABBAA', 'B', -1) FROM DUAL; -- 10번째 자리 B
+SELECT INSTR('AABAACAABBAA', 'B', -5) FROM DUAL; -- 3번째 자리 B
+SELECT INSTR('AABAACAABBAA', 'B', 1, 2) FROM DUAL; -- 9번째 자리 B
+SELECT INSTR('AABAACAABBAA', 'B', 1, -1) FROM DUAL; -- OCCURRENCE에 음수 사용 불가
+SELECT INSTR('AABAACAABBAA', 'B', 1, 4) FROM DUAL; -- 0
+SELECT INSTR('AABAACAABBAA', 'B', -1, 3) FROM DUAL; -- 3번째 자리 B
+
+SELECT EMAIL AS "이메일",
+       INSTR(EMAIL, '@') AS "@ 위치",
+       INSTR(EMAIL, 's', 1, 2) AS "두 번째 S 위치"
+FROM EMPLOYEE;
+
+/*
+      3) LPAD / RPAD
+         LPAD/RPAD(CHARACTER, NUMBER[, CHARACTER])
+*/
+-- 10만큼의 길이 중 HELLO 값은 오른쪽으로 정렬하고 공백을 왼쪽에 채운다.
+SELECT LPAD('HELLO', 10) FROM DUAL;
+SELECT LPAD('HELLO', 10, '*') FROM DUAL;
+
+-- 10만큼의 길이 중 HELLO 값은 왼쪽으로 정렬하고 공백을 오른쪽에 채운다.
+SELECT RPAD('HELLO', 10) FROM DUAL;
+SELECT RPAD('HELLO', 10, '#') FROM DUAL;
+
+-- 991231-1******를 출력
+SELECT RPAD('991231-1', 14, '*') FROM DUAL;
+
+SELECT EMP_NAME,
+       RPAD(LPAD(EMP_NAME, 3), 5, '*'),
+       EMP_NO,
+       RPAD(LPAD(EMP_NO, 8), 14, '*')
+FROM EMPLOYEE;
+
+/*
+      4) LTRIM / RTRIM
+         LTRIM/RTRIM(CHARACTER[, CHARACTER])
+*/
+SELECT LTRIM('    KH') FROM DUAL;
+SELECT LTRIM('000123456', '0') FROM DUAL;
+SELECT LTRIM('123123456', '123') FROM DUAL;
+SELECT LTRIM('123123456123', '123') FROM DUAL;
+SELECT LTRIM('123123456', '321') FROM DUAL;
+
+SELECT RTRIM('KH   ') FROM DUAL;
+SELECT RTRIM('KH   ', ' ') FROM DUAL;
+SELECT RTRIM('0012340056000', '0') FROM DUAL;
+
+-- 양쪽 공백 제거
+SELECT LTRIM(RTRIM('   KH   ')) FROM DUAL;
+
+-- 양쪽 문자 제거
+SELECT LTRIM(RTRIM('000123456000', '0'), '0') FROM DUAL;
+
+/*
+      5) TRIM
+         TRIM([[LEADING|TRAILING|BOTH] CHARACTER FROM] CHARACTER)
+*/
+-- 양쪽에 있는 공백을 제거한다.
+SELECT TRIM('   KH   ') FROM DUAL;
+SELECT TRIM(' ' FROM '   KH   ') FROM DUAL;
+SELECT TRIM(BOTH ' ' FROM '   KH   ') FROM DUAL;
+-- 앞쪽에 있는 공백을 제거한다.
+SELECT TRIM(LEADING ' ' FROM '   KH   ') FROM DUAL;
+-- 뒤쪽에 있는 공백을 제거한다.
+SELECT TRIM(TRAILING ' ' FROM '   KH   ') FROM DUAL;
+
+-- 양쪽에 있는 문자를 제거한다.
+SELECT TRIM('Z' FROM 'ZZZKHZZZ') FROM DUAL;
+SELECT TRIM(BOTH 'Z' FROM 'ZZZKHZZZ') FROM DUAL;
+SELECT TRIM('ZZ' FROM 'ZZZKHZZZ') FROM DUAL; -- 에러 발생
+-- 앞쪽에 있는 문자를 제거한다.
+SELECT TRIM(LEADING 'Z' FROM 'ZZZKHZZZ') FROM DUAL;
+-- 뒤쪽에 있는 문자를 제거한다.
+SELECT TRIM(TRAILING 'Z' FROM 'ZZZKHZZZ') FROM DUAL;
+
+/*
+      6) SUBSTR
+         SUBSTR(CHARACTER, POSITION[, LENGTH])
+*/
+SELECT SUBSTR('SHOWMETHEMONEY', 7) FROM DUAL;
+SELECT SUBSTR('SHOWMETHEMONEY', 7, 3) FROM DUAL;
+SELECT SUBSTR('SHOWMETHEMONEY', 1, 6) FROM DUAL;
+SELECT SUBSTR('SHOWMETHEMONEY', -8, 3) FROM DUAL;
+SELECT SUBSTR('SHOW ME THE MONEY', 1, 7) FROM DUAL;
+
+-- EMPLOYEE 테이블에서 주민번호에 성별을 나타내는 부분만 잘라서 조회
+SELECT EMP_NAME AS "직원명", 
+       SUBSTR(EMP_NO, 8, 1) AS "성별 코드"
+FROM EMPLOYEE
+--WHERE SUBSTR(EMP_NO, 8, 1) = 1 OR SUBSTR(EMP_NO, 8, 1) = 3;
+WHERE SUBSTR(EMP_NO, 8, 1) IN (2, 4);
+
+-- EMPLOYEE 테이블에서 주민번호 첫 번째 자리부터 성별코드까지 추출한 
+-- 결과값 오른쪽에 * 문자를 채워서 14글자로 조회
+--  EX) 991212-1******
+SELECT SUBSTR('991212-1234567', 1, 8)
+FROM DUAL;
+
+SELECT RPAD(SUBSTR('991212-1234567', 1, 8), 14, '*')
+FROM DUAL;
+
+SELECT EMP_NAME AS "직원명",
+       RPAD(SUBSTR(EMP_NO, 1, 8), 14, '*') AS "주민번호"
+FROM EMPLOYEE;
+
+-- EMPLOYEE 테이블에서 직원명, 이메일, 아이디(이메일에서 '@' 앞에 
+-- 문자 값만 출력) 조회
+--  EX) sun_di@kh.or.kr -> sun_di
+SELECT INSTR('sun_di@kh.or.kr', '@') 
+FROM DUAL;
+
+SELECT SUBSTR('sun_di@kh.or.kr', 1, INSTR('sun_di@kh.or.kr', '@') - 1) 
+FROM DUAL;
+
+SELECT LPAD('sun_di@kh.or.kr', INSTR('sun_di@kh.or.kr', '@') - 1)
+FROM DUAL;
+
+SELECT EMP_NAME AS "직원명",
+       EMAIL AS "이메일",
+       SUBSTR(EMAIL, 1, INSTR(EMAIL, '@') - 1) AS "아이디"
+FROM EMPLOYEE;
+
+/*
+      7) LOWER / UPPER / INITCAP
+         LOWER/UPPER/INITCAP(CHARACTER)
+*/
+SELECT UPPER('show me the money') FROM DUAL; -- 대문자로 변경
+SELECT LOWER('SHOW ME THE MONEY') FROM DUAL; -- 소문자로 변경
+SELECT INITCAP('show me the money') FROM DUAL; -- 단어 앞 글자마다 대문자로 변경
+
+/*
+      8) CONCAT
+         CONCAT(CHARACTER, CHARACTER)
+*/
+SELECT CONCAT('가나다라', '마바사아') FROM DUAL;
+SELECT '가나다라' || '마바사아' FROM DUAL;
+
+-- CONCAT 함수는 두 개의 문자 데이터만 전달받을 수 있다.
+SELECT CONCAT('가나다라', '마바사아', '자차카타') FROM DUAL;
+SELECT '가나다라' || '마바사아' || '자차카타' FROM DUAL;
+SELECT CONCAT(CONCAT('가나다라', '마바사아'), '자차카타') FROM DUAL;
+
+SELECT EMP_NAME || '님의 급여는 ' || SALARY || '입니다.'
+FROM EMPLOYEE;
+
+--SELECT CONCAT(EMP_NAME, CONCAT('님의 급여는 ', CONCAT(SALARY, '입니다.')))
+SELECT CONCAT(CONCAT(EMP_NAME, '님의 급여는 '), CONCAT(SALARY, '입니다.'))
+FROM EMPLOYEE;
+
+/*
+      9) REPLACE
+         REPLACE(CHARACTER, CHARACTER, CHARACTER)
+*/
+-- EMPLOYEE 테이블에서 이메일의 kh.or.kr을 gmail.com 변경해서 조회
+-- sun_di@kh.or.kr -> sun_di@gmail.com
+SELECT REPLACE('sun_di@kh.or.kr', 'kh.or.kr', 'gmail.com')
+FROM DUAL;
+
+SELECT EMAIL,
+       REPLACE(EMAIL, 'kh.or.kr', 'gmail.com'),
+       REPLACE(EMAIL, '@kh.or.kr', '')
+FROM EMPLOYEE;
+
+/*
+    <숫자 처리 함수>
+      1) ABS
+         ABS(NUMBER)
+*/
+SELECT ABS(10), ABS(-10) FROM DUAL;
+SELECT ABS(10.9), ABS(-10.9) FROM DUAL;
+
+/*
+      2) MOD
+         MOD(NUMBER, NUMBER)
+*/
+SELECT 10 + 3,
+       10 - 3, 
+       10 * 3, 
+       10 / 3, 
+--       10 % 3
+       MOD(10, 3)
+FROM DUAL;
+
+SELECT MOD(-10, 3) FROM DUAL;
+SELECT MOD(10, -3) FROM DUAL;
+SELECT MOD(10.9, 3) FROM DUAL;
+SELECT MOD(-10.9, 3) FROM DUAL;
+
+/*
+      3) ROUND
+         ROUND(NUMBER[, POSITION])
+*/
+SELECT ROUND(123.456) FROM DUAL;
+SELECT ROUND(123.456, 0) FROM DUAL;
+SELECT ROUND(123.456, 1) FROM DUAL;
+SELECT ROUND(125.456, -1) FROM DUAL;
+SELECT ROUND(123.456, 2) FROM DUAL;
+SELECT ROUND(125.456, -2) FROM DUAL;
+
+/*
+      4) CEIL
+         CEIL(NUMBER)
+*/
+SELECT CEIL(123.456) FROM DUAL;
+--SELECT CEIL(123.456, 2) FROM DUAL; -- 에러 발생
+
+/*
+      5) FLOOR
+         FLOOR(NUMBER)
+*/
+SELECT FLOOR(123.456) FROM DUAL;
+SELECT FLOOR(456.789) FROM DUAL;
+SELECT FLOOR(456.789, 1) FROM DUAL;
+
+/*
+      6) TRUNC
+         TRUNC(NUMBER[, POSITION])
+*/
+SELECT TRUNC(123.456) FROM DUAL;
+SELECT TRUNC(456.789) FROM DUAL;
+SELECT TRUNC(456.789, 0) FROM DUAL;
+SELECT TRUNC(456.789, 1) FROM DUAL;
+SELECT TRUNC(456.789, -1) FROM DUAL;
+
+/*
+    <날짜 처리 함수>
+      1) SYSDATE
+*/
+SELECT SYSDATE FROM DUAL;
+
+-- 날짜 출력 포맷 변경
+ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD HH:MI:SS';
+ALTER SESSION SET NLS_DATE_FORMAT = 'RR/MM/DD';
+
+/*
+      2) MONTHS_BETWEEN
+         MONTHS_BETWEEN(DATE, DATE)
+*/
+SELECT FLOOR(MONTHS_BETWEEN(SYSDATE, '20230525')) FROM DUAL;
+
+-- EMPLOYEE 테이블에서 직원명, 입사일, 근무 개월 수 조회
+SELECT EMP_NAME AS "직원명", 
+       HIRE_DATE AS "입사일",
+       FLOOR(MONTHS_BETWEEN(SYSDATE, HIRE_DATE)) AS "근무 개월 수"
+FROM EMPLOYEE;
+
+/*
+      3) ADD_MONTHS
+         ADD_MONTHS(DATE, NUMBER)
+*/
+SELECT ADD_MONTHS(SYSDATE, 6) FROM DUAL;
+
+-- EMPLOYEE 테이블에서 직원명, 입사일, 입사 후 3개월이 된 날짜를 조회
+SELECT EMP_NAME AS "직원명", 
+       HIRE_DATE AS "입사일", 
+       ADD_MONTHS(HIRE_DATE, 3) AS "인턴 종료일"
+FROM EMPLOYEE;
+
+/*
+      4) NEXT_DAY
+         NEXT_DAY(DATE, CHARACTER|NUMBER)
+*/
+-- 현재 날짜에서 제일 가까운 일요일 조회
+SELECT SYSDATE, NEXT_DAY(SYSDATE, '일요일') FROM DUAL;
+SELECT SYSDATE, NEXT_DAY(SYSDATE, '일') FROM DUAL;
+-- 1: 일요일, 2: 월요일, 3: 화요일, ..., 7: 토요일
+SELECT SYSDATE, NEXT_DAY(SYSDATE, 1) FROM DUAL;
+SELECT SYSDATE, NEXT_DAY(SYSDATE, 'SUNDAY') FROM DUAL;
+SELECT SYSDATE, NEXT_DAY(SYSDATE, 'SUN') FROM DUAL;
+
+-- 언어 변경
+ALTER SESSION SET NLS_LANGUAGE = 'AMERICAN';
+ALTER SESSION SET NLS_LANGUAGE = 'KOREAN';
+
+/*
+      5) LAST_DAY
+         LAST_DAY(DATE)
+*/
+SELECT LAST_DAY(SYSDATE) FROM DUAL;
+SELECT LAST_DAY('20230201') FROM DUAL;
+SELECT LAST_DAY('20200201') FROM DUAL;
+
+-- EMPLOYEE 테이블에서 직원명, 입사일, 입사월의 마지막 날, 
+-- 급여일(매달 마지막 날) 조회
+SELECT EMP_NAME,
+       HIRE_DATE,
+       LAST_DAY(HIRE_DATE),
+       LAST_DAY(SYSDATE)
+FROM EMPLOYEE;
+
+/*
+      6) EXTRACT
+         EXTRACT(YEAR|MONTH|DAY FROM DATE)
+*/
+SELECT EXTRACT(YEAR FROM SYSDATE),
+       EXTRACT(MONTH FROM SYSDATE),
+       EXTRACT(DAY FROM SYSDATE)
+FROM DUAL;
+
+-- EMPLOYEE 테이블에서 직원명, 입사년도, 입사월, 입사일 조회
+SELECT EMP_NAME AS "직원명",
+       EXTRACT(YEAR FROM HIRE_DATE) || '년' AS "입사년도",
+       EXTRACT(MONTH FROM HIRE_DATE)|| '월' AS "입사월",
+       EXTRACT(DAY FROM HIRE_DATE) || '일' AS "입사일"
+FROM EMPLOYEE
+ORDER BY HIRE_DATE;
+
+/*
+    <형 변환 함수>
+      1) TO_CHAR
+         TO_CHAR(NUMBER|DATE[, FORMAT])
+*/
+-- 숫자 -> 문자
+SELECT TO_CHAR(1234) FROM DUAL;
+-- 6칸의 공간을 확보, 오른쪽 정렬, 빈칸 공백으로 채운다.
+SELECT TO_CHAR(1234, '999999') FROM DUAL;
+-- 포맷 자리수에 안 맞으면 ###으로 출력 됨
+SELECT TO_CHAR(1234, '99') FROM DUAL;
+-- 6칸의 공간을 확보, 오른쪽 정렬, 빈칸 0으로 채운다.
+SELECT TO_CHAR(1234, '000000') FROM DUAL;
+-- 포맷 자리수에 안 맞으면 ###으로 출력 됨
+SELECT TO_CHAR(1234, '00') FROM DUAL;
+SELECT TO_CHAR(2000000, '9,999,999') FROM DUAL; -- 자리수 구분
+-- 현재 설정된 나라(LOCAL)의 화폐단위
+SELECT TO_CHAR(2000000, 'FML9,999,999') FROM DUAL;
+SELECT TO_CHAR(2000000, '$9,999,999') FROM DUAL;
+
+-- EMPLOYEE 테이블에서 직원명, 급여, 연봉 조회
+SELECT EMP_NAME AS "직원명",
+       TO_CHAR(SALARY, 'FML99,999,999') AS "급여",
+       TO_CHAR(SALARY * 12, 'FML999,999,999') AS "연봉"
+FROM EMPLOYEE
+ORDER BY "연봉" DESC;
+
+-- 날짜 -> 문자
+SELECT SYSDATE FROM DUAL;
+SELECT TO_CHAR(SYSDATE) FROM DUAL;
+SELECT TO_CHAR(SYSDATE, 'PM HH:MI:SS') FROM DUAL;
+SELECT TO_CHAR(SYSDATE, 'HH24:MI:SS') FROM DUAL;
+SELECT TO_CHAR(SYSDATE, 'MONTH DAY, YYYY') FROM DUAL;
+SELECT TO_CHAR(SYSDATE, 'MON DY, YYYY') FROM DUAL;
+SELECT TO_CHAR(SYSDATE, 'YYYY-MM-DD(DY)') FROM DUAL;
+SELECT TO_CHAR(SYSDATE, 'YYYY-MM-DD(DAY)') FROM DUAL;
+
+-- 날짜 출력 포맷 변경
+ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD HH:MI:SS';
+ALTER SESSION SET NLS_DATE_FORMAT = 'RR/MM/DD';
+
+-- 언어 변경
+ALTER SESSION SET NLS_LANGUAGE = 'AMERICAN';
+ALTER SESSION SET NLS_LANGUAGE = 'KOREAN';
+
+-- 연도에 대한 포맷 문자
+SELECT TO_CHAR(SYSDATE, 'YYYY'),
+       TO_CHAR(SYSDATE, 'YY'),
+       TO_CHAR(SYSDATE, 'RRRR'),
+       TO_CHAR(SYSDATE, 'RR'), 
+       TO_CHAR(SYSDATE, 'YEAR') 
+FROM DUAL;
+
+-- 월에 대한 포맷 문자
+SELECT TO_CHAR(SYSDATE, 'MM'),
+       TO_CHAR(SYSDATE, 'MON'),
+       TO_CHAR(SYSDATE, 'MONTH'),
+       TO_CHAR(SYSDATE, 'RM') -- 로마 숫자
+FROM DUAL;
+
+-- 일에 대한 포맷 문자
+SELECT TO_CHAR(SYSDATE, 'D'), -- 1주를 기준으로 며칠째
+       TO_CHAR(SYSDATE, 'DD'), -- 1달을 기준으로 며칠째
+       TO_CHAR(SYSDATE, 'DDD') -- 1년을 기준으로 며칠째
+FROM DUAL;
+
+-- 요일에 대한 포맷 문자
+SELECT TO_CHAR(SYSDATE, 'DAY'),
+       TO_CHAR(SYSDATE, 'DY')
+FROM DUAL;
+
+-- EMPLOYEE 테이블에서 직원명, 입사일(2023-05-25)
+SELECT EMP_NAME AS "직원명",
+       TO_CHAR(HIRE_DATE, 'YYYY-MM-DD') AS "입사일"
+FROM EMPLOYEE
+ORDER BY HIRE_DATE;
+
+-- EMPLOYEE 테이블에서 직원명, 입사일(2023년 05월 25일)
+SELECT EMP_NAME AS "직원명",
+       TO_CHAR(HIRE_DATE, 'YYYY"년" MM"월" DD"일"(DY)') AS "입사일"
+FROM EMPLOYEE
+ORDER BY HIRE_DATE;
+
+/*
+      2) TO_DATE
+         TO_DATE(NUMBER|CHARACTER[, FORMAT])
+*/
+-- 숫자 -> 날짜
+SELECT TO_DATE(20231106) FROM DUAL;
+SELECT TO_DATE(20231106124130) FROM DUAL;
+SELECT TO_DATE(20231106124130, 'YYYYMMDDHHMISS') FROM DUAL;
+
+-- 문자 -> 날짜
+SELECT TO_DATE('20231106') FROM DUAL;
+SELECT TO_DATE('20231106140630') FROM DUAL;
+SELECT TO_DATE('20231106140630', 'YYYYMMDDHH24MISS') FROM DUAL;
+
+-- YY와 RR
+-- YY는 무조건 현재 세기를 반영한다.
+-- RR은 50미만이면 현재 세기를 반영하고, 50이상이면 이전 세기를 반영한다.
+--       23   99
+-- YY  2023 2099
+-- RR  2023 1999
+SELECT TO_DATE('231106', 'YYMMDD') FROM DUAL;
+SELECT TO_DATE('991106', 'YYMMDD') FROM DUAL;
+
+SELECT TO_DATE('231106', 'RRMMDD') FROM DUAL;
+SELECT TO_DATE('991106', 'RRMMDD') FROM DUAL;
+
+-- 날짜 출력 포맷 변경
+ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD HH24:MI:SS';
+ALTER SESSION SET NLS_DATE_FORMAT = 'YY/MM/DD';
+
+-- EMPLOYEE 테이블에서 1998년 1월 1일 이후에 입사한 사원의 
+-- 사번, 직원명, 입사일 조회
+SELECT EMP_ID, EMP_NAME, HIRE_DATE
+FROM EMPLOYEE
+--WHERE HIRE_DATE > TO_DATE('19980101', 'YYYYMMDD')
+--WHERE HIRE_DATE > TO_DATE('19980101', 'RRRRMMDD')
+--WHERE HIRE_DATE > TO_DATE('980101', 'YYMMDD') -- 20980101
+--WHERE HIRE_DATE > TO_DATE('980101', 'RRMMDD')
+--WHERE HIRE_DATE > '19980101'
+WHERE HIRE_DATE > '980101'
+ORDER BY HIRE_DATE;
+
+-- 날짜 출력 포맷 변경
+ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD HH24:MI:SS';
+ALTER SESSION SET NLS_DATE_FORMAT = 'YY/MM/DD';
+ALTER SESSION SET NLS_DATE_FORMAT = 'RR/MM/DD';
+
+/*
+      3) TO_NUMBER
+         TO_NUMBER(CHARACTER[, FORMAT])
+*/
+SELECT TO_NUMBER('0123456789') FROM DUAL;
+SELECT TO_NUMBER('3,000,000', '9,999,999') FROM DUAL;
+
+-- 자동으로 숫자 타입으로 형 변환 뒤 연산처리를 한다.
+SELECT '123' + '456' FROM DUAL; 
+SELECT '123' + '456A' FROM DUAL; -- 에러 발생 
+
+SELECT TO_CHAR(
+        TO_NUMBER('10,000,000', '99,999,999') - TO_NUMBER('500,000', '999,999'),
+        '99,999,999'
+       )
+FROM DUAL;
+
+-- EMPLOYEE 테이블에서 사원번호가 210보다 큰 사원의 모든 컬럼 조회
+SELECT *
+FROM EMPLOYEE
+WHERE EMP_ID > 210;
+--WHERE EMP_ID > '210';
+
+/*
+    <NULL 처리 함수>
+      1) NVL
+         NVL(P1, P2)
+*/
+-- EMPLOYEE 테이블에서 직원명, 보너스 조회
+SELECT EMP_NAME AS "직원명",
+       NVL(BONUS, 0) AS "보너스"
+FROM EMPLOYEE
+ORDER BY "보너스";
+
+-- EMPLOYEE 테이블에서 직원명, 부서 코드를 조회
+-- (단, 부서 코드가 NULL이면 '부서없음' 출력)
+SELECT EMP_NAME AS "직원명",
+       NVL(DEPT_CODE, '부서없음') AS "부서코드"
+FROM EMPLOYEE
+ORDER BY "부서코드";
+
+/*
+      2) NVL2
+         NVL2(P1, P2, P3)
+*/
+-- EMPLOYEE 테이블에서 보너스를 0.1로 동결하여 
+-- 직원명, 보너스, 동결된 보너스, 보너스가 포함된 연봉 조회
+SELECT EMP_NAME AS "직원명",
+       NVL(BONUS, 0) AS "보너스",
+       NVL2(BONUS, 0.1, 0) AS "동결된 보너스",
+--       (SALARY + (SALARY * NVL(BONUS, 0))) * 12 AS "연봉",
+       (SALARY + (SALARY * NVL2(BONUS, 0.1, 0))) * 12 AS "연봉"
+FROM EMPLOYEE;       
+
+/*
+     3) NULLIF
+        NULLIF(P1,P2)
+*/
+SELECT NULLIF(123, 123) FROM DUAL;
+SELECT NULLIF(123, 456) FROM DUAL;
+
+SELECT NULLIF('123', '123') FROM DUAL;
+SELECT NULLIF('123', '456') FROM DUAL;
+
+/*
+    <선택 함수>
+      1) DECODE
+         DECODE(컬럼명|계산식, 조건값 1, 결과값 1, 조건값 2, 결과값 2, ..., 결과값)
+*/
+-- EMPLOYEE 테이블에서 사번, 직원명, 주민번호, 성별(남자, 여자) 조회
+SELECT EMP_ID, 
+       EMP_NAME,
+       EMP_NO,
+--       SUBSTR(EMP_NO, 8, 1)
+       DECODE(SUBSTR(EMP_NO, 8, 1), 1, '남자', 2, '여자', 3, '남자', 4, '여자', '잘못된 주민번호입니다.')
+FROM EMPLOYEE;
+
+-- EMPLOYEE 테이블에서 직원명, 직급 코드, 기존 급여, 인상된 급여 조회
+-- 직급 코드가 J7인 사원은 급여를 10% 인상
+-- 직급 코드가 J6인 사원은 급여를 15% 인상
+-- 직급 코드가 J5인 사원은 급여를 20% 인상
+-- 그 외의 직급의 사원은 급여를 5% 인상
+SELECT EMP_NAME AS "직원명",
+       JOB_CODE AS "직급 코드",
+       TO_CHAR(SALARY, '9,999,999') AS "기존 급여",
+       TO_CHAR (
+         DECODE(JOB_CODE, 'J7', SALARY * 1.1, 'J6', SALARY * 1.15, 'J5', SALARY * 1.2, SALARY * 1.05),
+         '99,999,999'  
+       )AS "인상된 급여"
+FROM EMPLOYEE;
+
+/*
+      2) CASE
+         CASE WHEN 조건 1 THEN 결과 1
+              WHEN 조건 2 THEN 결과 2
+              ...
+              ELSE 결과
+         END
+*/
+-- EMPLOYEE 테이블에서 사번, 직원명, 주민번호, 성별(남자, 여자) 조회
+SELECT EMP_ID AS "사번", 
+       EMP_NAME AS "직원명",
+       EMP_NO AS "주민번호",
+--       CASE WHEN SUBSTR(EMP_NO, 8, 1) = '1' THEN '남자'
+--            WHEN SUBSTR(EMP_NO, 8, 1) = '2' THEN '여자'
+       CASE WHEN SUBSTR(EMP_NO, 8, 1) IN ('1', '3') THEN '남자'
+            WHEN SUBSTR(EMP_NO, 8, 1) IN ('2', '4') THEN '여자'
+            ELSE '잘못된 주민번호입니다.'
+       END AS "성별"
+FROM EMPLOYEE;
+
+-- EMPLOYEE 테이블에서 직원명, 급여, 급여 등급(S1 ~ S4) 조회
+-- SALARY 값이 500만원 초과일 경우 S1
+-- SALARY 값이 500만원 이하 350만원 초과일 경우 S2
+-- SALARY 값이 350만원 이하 200만원 초과일 경우 S3
+-- 그 외에 경우 S4
+SELECT EMP_NAME,
+       SALARY,
+       CASE WHEN SALARY > 5000000 THEN 'S1'
+            WHEN SALARY > 3500000 THEN 'S2'
+            WHEN SALARY > 2000000 THEN 'S3'
+            ELSE 'S4'
+       END
+FROM EMPLOYEE
+ORDER BY SALARY DESC;
+
+/*
+    <그룹 함수>
+      1) SUM
+         SUM(NUMBER 타입의 컬럼)
+*/
+-- EMPLOYEE 테이블에서 전 사원의 급여의 합계를 조회
+SELECT SUM(SALARY)
+FROM EMPLOYEE;
+
+-- EMPLOYEE 테이블에서 전 사원의 연봉의 합계를 조회
+SELECT SUM(SALARY * 12)
+FROM EMPLOYEE;
+
+-- EMPLOYEE 테이블에서 여자 사원의 급여의 합계를 조회
+SELECT SUM(SALARY)
+FROM EMPLOYEE
+WHERE SUBSTR(EMP_NO, 8, 1) = '2';
+
+-- EMPLOYEE 테이블에서 부서 코드가 'D5'인 사원들의 연봉의 합계를 조회
+SELECT TO_CHAR(SUM(SALARY * 12), 'FML999,999,999')
+FROM EMPLOYEE
+WHERE DEPT_CODE = 'D5';
+
+/*
+      2) AVG
+         AVG(NUMBER 타입의 컬럼)
+*/
+-- EMPLOYEE 테이블에서 전체 사원의 급여 평균
+SELECT TO_CHAR(ROUND(AVG(NVL(SALARY, 0))), '9,999,999') AS "급여 평균"
+FROM EMPLOYEE;
+
+-- EMPLOYEE 테이블에서 전체 사원의 보너스 평균 조회
+SELECT ROUND(AVG(NVL(BONUS, 0)), 2) AS "보너스 평균"
+FROM EMPLOYEE;
+
+/*
+      3) MIN / MAX
+         MIN/MAX(모든 타입의 컬럼)
+*/
+SELECT MIN(BONUS), MAX(BONUS),
+       MIN(EMP_NAME), MAX(EMP_NAME),
+       MIN(HIRE_DATE), MAX(HIRE_DATE)
+FROM EMPLOYEE;
+
+/*
+      4) COUNT
+         COUNT(* | 컬럼명 | DISTINCT 컬럼명)
+*/
+-- EMPLOYEE 테이블에서 전체 사원의 수를 조회
+SELECT COUNT(*)
+FROM EMPLOYEE;
+
+-- EMPLOYEE 테이블에서 남자 사원의 수를 조회
+SELECT COUNT(*)
+FROM EMPLOYEE
+WHERE SUBSTR(EMP_NO, 8, 1) IN ('1', '3');
+
+-- EMPLOYEE 테이블에서 보너스를 받는 직원의 수를 조회
+SELECT COUNT(*)
+FROM EMPLOYEE
+WHERE BONUS IS NOT NULL;
+
+SELECT COUNT(BONUS)
+FROM EMPLOYEE;
+
+-- EMPLOYEE 테이블에서 퇴사한 직원의 수를 조회
+SELECT COUNT(ENT_DATE)
+FROM EMPLOYEE;
+
+SELECT COUNT(*)
+FROM EMPLOYEE
+WHERE ENT_DATE IS NOT NULL;
+
+SELECT COUNT(*)
+FROM EMPLOYEE
+WHERE ENT_YN = 'Y';
+
+-- EMPLOYEE 테이블에서 현재 사원들이 속해있는 부서의 수를 조회
+SELECT COUNT(DISTINCT DEPT_CODE)
+FROM EMPLOYEE;
+
+-- EMPLOYEE 테이블에서 현재 사원들이 분포되어 있는 직급의 수를 조회
+SELECT COUNT(DISTINCT JOB_CODE)
+FROM EMPLOYEE;

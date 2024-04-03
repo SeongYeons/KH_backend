@@ -1,0 +1,419 @@
+/*
+  <VIEW>
+    VIEW는 오라클에서 제공하는 객체로 가상의 테이블이다.
+*/
+-- '한국'에서 근무하는 사원들의 사번, 직원명, 부서명, 급여, 
+-- 근무 국가명을 조회
+SELECT E.EMP_ID,
+       E.EMP_NAME,
+       D.DEPT_TITLE,
+       E.SALARY,
+       N.NATIONAL_NAME
+FROM EMPLOYEE E
+INNER JOIN DEPARTMENT D ON (E.DEPT_CODE = D.DEPT_ID)
+INNER JOIN LOCATION L ON (D.LOCATION_ID = L.LOCAL_CODE)
+INNER JOIN NATIONAL N ON (L.NATIONAL_CODE = N.NATIONAL_CODE)
+WHERE N.NATIONAL_NAME = '한국';
+
+-- '러시아'에서 근무하는 사원들의 사번, 직원명, 부서명, 급여, 
+-- 근무 국가명을 조회
+SELECT E.EMP_ID,
+       E.EMP_NAME,
+       D.DEPT_TITLE,
+       E.SALARY,
+       N.NATIONAL_NAME
+FROM EMPLOYEE E
+INNER JOIN DEPARTMENT D ON (E.DEPT_CODE = D.DEPT_ID)
+INNER JOIN LOCATION L ON (D.LOCATION_ID = L.LOCAL_CODE)
+INNER JOIN NATIONAL N ON (L.NATIONAL_CODE = N.NATIONAL_CODE)
+WHERE N.NATIONAL_NAME = '러시아';
+
+-- '일본'에서 근무하는 사원들의 사번, 직원명, 부서명, 급여, 
+-- 근무 국가명을 조회
+SELECT E.EMP_ID,
+       E.EMP_NAME,
+       D.DEPT_TITLE,
+       E.SALARY,
+       N.NATIONAL_NAME
+FROM EMPLOYEE E
+INNER JOIN DEPARTMENT D ON (E.DEPT_CODE = D.DEPT_ID)
+INNER JOIN LOCATION L ON (D.LOCATION_ID = L.LOCAL_CODE)
+INNER JOIN NATIONAL N ON (L.NATIONAL_CODE = N.NATIONAL_CODE)
+WHERE N.NATIONAL_NAME = '일본';
+
+/*
+  1. VIEW 생성
+*/
+-- 처음 뷰를 생성 시 관리자 계정으로 CREATE VIEW 권한을 주어야 한다.
+GRANT CREATE VIEW TO C##KH;
+
+CREATE OR REPLACE VIEW V_EMPLOYEE
+AS SELECT E.EMP_ID,
+          E.EMP_NAME,
+          D.DEPT_TITLE,
+          E.SALARY,
+          N.NATIONAL_NAME
+   FROM EMPLOYEE E
+   INNER JOIN DEPARTMENT D ON (E.DEPT_CODE = D.DEPT_ID)
+   INNER JOIN LOCATION L ON (D.LOCATION_ID = L.LOCAL_CODE)
+   INNER JOIN NATIONAL N ON (L.NATIONAL_CODE = N.NATIONAL_CODE);
+
+-- 가상 테이블로 실제 데이터가 담겨있는 것은 아니다.
+SELECT * FROM V_EMPLOYEE;
+
+-- 접속한 계정이 가지고 있는 VIEW에 정보를 조회하는 뷰 테이블이다.
+SELECT * FROM USER_VIEWS;
+
+-- '한국'에서 근무하는 사원들의 정보를 조회
+SELECT *
+FROM V_EMPLOYEE
+WHERE NATIONAL_NAME = '한국';
+
+-- '러시아'에서 근무하는 사원들의 정보를 조회
+SELECT *
+FROM V_EMPLOYEE
+WHERE NATIONAL_NAME = '러시아';
+
+-- '일본'에서 근무하는 사원들의 정보를 조회
+SELECT *
+FROM V_EMPLOYEE
+WHERE NATIONAL_NAME = '일본';
+
+/*
+  2. 뷰 컬럼에 별칭 부여
+*/
+-- 모든 사원들의 사번, 직원명, 성별 코드, 근무년수, 연봉을 조회할 수 있는 뷰 생성 
+-- 1) 서브 쿼리에 별칭을 부여하는 방법
+CREATE OR REPLACE VIEW V_EMPLOYEE
+AS SELECT EMP_ID AS "사번",
+          EMP_NAME AS "직원명",
+          SUBSTR(EMP_NO, 8, 1) AS "성별 코드",
+          EXTRACT(YEAR FROM SYSDATE) - EXTRACT(YEAR FROM HIRE_DATE) AS "근무년수",
+          SALARY * 12 AS "연봉"
+   FROM EMPLOYEE;
+
+-- 2) 뷰 생성 시 모든 컬럼에 별칭을 부여하는 방법
+CREATE OR REPLACE VIEW V_EMPLOYEE("사번", "직원명", "성별 코드", "근무년수", "연봉")
+AS SELECT EMP_ID,
+          EMP_NAME,
+          SUBSTR(EMP_NO, 8, 1),
+          EXTRACT(YEAR FROM SYSDATE) - EXTRACT(YEAR FROM HIRE_DATE),
+          SALARY * 12
+   FROM EMPLOYEE;
+   
+SELECT * FROM V_EMPLOYEE;
+SELECT * FROM USER_VIEWS;
+
+-- 뷰 삭제
+DROP VIEW V_EMPLOYEE;
+
+/*
+  3. VIEW를 이용해서 DML(INSERT, UPDATE, DELETE) 사용
+*/
+CREATE VIEW V_JOB
+AS SELECT *
+   FROM JOB;
+   
+-- VIEW를 SELECT 
+SELECT *
+FROM V_JOB;
+
+-- VIEW에 INSERT
+INSERT INTO V_JOB VALUES ('J8', '알바');
+
+-- VIEW에 UPDATE
+UPDATE V_JOB
+SET JOB_NAME = '인턴'
+WHERE JOB_CODE = 'J8';
+
+-- VIEW에 DELETE
+DELETE 
+FROM V_JOB
+WHERE JOB_CODE = 'J8';
+
+/*
+  4. DML 구문으로 VIEW 조작이 불가능한 경우
+    - 뷰 정의에 포함되지 않은 컬럼을 조작하는 경우
+    - 뷰에 포함되지 않는 컬럼 중에 기본 테이블 상에 NOT NULL 제약조건이 지정된 경우
+    - 산술 표현식으로 정의된 경우
+    - 그룹 함수나 GROUP BY 절을 포함한 경우
+    - DISTINCT를 포함한 경우
+    - JOIN을 이용해 여러 테이블을 연결한 경우
+*/
+
+-- 1) 뷰 정의에 포함되지 않은 컬럼을 조작하는 경우
+CREATE OR REPLACE VIEW V_JOB
+AS SELECT JOB_CODE
+   FROM JOB;
+
+-- INSERT
+INSERT INTO V_JOB VALUES ('J8', '인턴'); -- 에러 발생
+INSERT INTO V_JOB VALUES ('J8');
+
+-- UPDATE
+UPDATE V_JOB
+SET JOB_NAME = '인턴'
+WHERE JOB_CODE = 'J8'; -- 에러 발생 
+
+UPDATE V_JOB
+SET JOB_CODE = 'J0'
+WHERE JOB_CODE = 'J8';
+
+-- DELETE
+DELETE
+FROM V_JOB
+WHERE JOB_NAME IS NULL; -- 에러 발생
+
+DELETE
+FROM V_JOB
+WHERE JOB_CODE = 'J0';
+
+-- 2) 뷰에 포함되지 않는 컬럼 중에 NOT NULL 제약조건이 지정된 경우
+CREATE OR REPLACE VIEW V_JOB
+AS SELECT JOB_NAME
+   FROM JOB;   
+   
+-- INSERT
+INSERT INTO V_JOB VALUES ('인턴');
+
+SELECT * FROM V_JOB;
+SELECT * FROM JOB;
+
+-- 3) 산술 표현식으로 정의된 경우
+-- 사원의 연봉 정보를 조회하는 뷰
+CREATE VIEW V_EMP_SAL
+AS SELECT EMP_ID,
+          EMP_NAME,
+          EMP_NO,
+          SALARY,
+          SALARY * 12 AS "연봉"
+   FROM EMPLOYEE;
+   
+-- INSERT
+-- 산술 연산으로 정의된 컬럼은 데이터 삽입 불가능
+INSERT INTO V_EMP_SAL 
+VALUES('100', '홍길동', '231115-3333333', 3000000, 36000000);
+
+-- 산술 연산으로 무관한 컬럼은 데이터 삽입 가능
+INSERT INTO V_EMP_SAL(EMP_ID, EMP_NAME, EMP_NO, SALARY)
+VALUES('100', '홍길동', '231115-3333333', 3000000);
+
+-- UPDATE
+-- 산술 연산으로 정의된 컬럼은 데이터 변경 불가능
+UPDATE V_EMP_SAL
+SET "연봉" = 50000000
+WHERE EMP_ID = '100';
+
+-- 산술 연산과 무관한 컬럼은 데이터 변경 가능
+UPDATE V_EMP_SAL
+SET SALARY = 5000000
+WHERE EMP_ID = '100';
+
+-- DELETE
+DELETE
+FROM V_EMP_SAL
+WHERE "연봉" = 60000000;
+
+SELECT * FROM V_EMP_SAL ORDER BY EMP_ID;
+SELECT * FROM EMPLOYEE ORDER BY EMP_ID;
+
+-- 4) 그룹 함수나 GROUP BY 절을 포함한 경우
+-- 부서별 급여의 합계, 급여 평균을 조회하는 뷰를 생성
+CREATE OR REPLACE VIEW V_EMP_SAL("부서코드", "합계", "평균")
+AS SELECT DEPT_CODE, 
+          SUM(SALARY), 
+          FLOOR(AVG(SALARY))
+   FROM EMPLOYEE
+   GROUP BY DEPT_CODE;
+
+-- INSERT
+INSERT INTO V_EMP_SAL VALUES('D0', 8000000, 4000000); -- 에러 발생
+
+INSERT INTO V_EMP_SAL("부서코드") VALUES('D0');
+
+-- UPDATE
+UPDATE V_EMP_SAL
+SET "합계" = 12000000
+WHERE "부서코드" = 'D1';
+
+UPDATE V_EMP_SAL
+SET "부서코드" = 'D0'
+WHERE "부서코드" = 'D1';
+
+-- DELETE
+DELETE 
+FROM V_EMP_SAL
+WHERE "부서코드" = 'D1';
+
+SELECT * FROM V_EMP_SAL;
+
+-- 5) DISTINCT를 포함한 경우
+CREATE VIEW V_EMP_JOB
+AS SELECT DISTINCT JOB_CODE
+   FROM EMPLOYEE;
+   
+-- INSERT
+INSERT INTO V_EMP_JOB VALUES('J8');
+
+-- UPDATE
+UPDATE V_EMP_JOB
+SET JOB_CODE = 'J8'
+WHERE JOB_CODE = 'J7';
+
+-- DELETE
+DELETE
+FROM V_EMP_JOB
+WHERE JOB_CODE = 'J7';
+
+SELECT * FROM V_EMP_JOB;
+
+-- 6) JOIN을 이용해 여러 테이블을 연결한 경우
+-- 직원들의 사번, 직원명, 주민번호, 부서명 조회하는 뷰를 생성
+CREATE VIEW V_EMP_DEPT
+AS SELECT E.EMP_ID,
+          E.EMP_NAME,
+          E.EMP_NO,
+          D.DEPT_TITLE
+   FROM EMPLOYEE E
+   INNER JOIN DEPARTMENT D ON (E.DEPT_CODE = D.DEPT_ID);
+
+-- INSERT
+INSERT INTO V_EMP_DEPT 
+VALUES('100', '홍길동', '941115-1111111', '인사부'); -- 에러 발생
+
+INSERT INTO V_EMP_DEPT(EMP_ID, EMP_NAME, EMP_NO)
+VALUES('100', '홍길동', '941115-1111111');
+
+-- UPDATE
+UPDATE V_EMP_DEPT
+SET DEPT_TITLE = '개발팀'
+WHERE EMP_ID = '200';
+
+UPDATE V_EMP_DEPT
+SET EMP_NAME = '김철수'
+WHERE EMP_ID = '200';
+
+-- 에러 발생
+UPDATE V_EMP_DEPT
+SET DEPT_TITLE = '개발팀',
+    EMP_NAME = '김철수'
+WHERE EMP_ID = '200';
+
+-- DELETE
+-- 서브 쿼리의 FROM절에 기술한 테이블에만 영향을 미친다.
+DELETE 
+FROM V_EMP_DEPT
+WHERE EMP_ID = '200';
+
+DELETE
+FROM V_EMP_DEPT
+WHERE DEPT_TITLE = '총무부';
+
+ROLLBACK;
+
+SELECT * FROM V_EMP_DEPT ORDER BY EMP_ID;
+SELECT * FROM EMPLOYEE ORDER BY EMP_ID;
+
+/*
+  5. VIEW 옵션
+*/  
+-- 1) OR REPLACE
+CREATE /* OR REPLACE */ VIEW V_EMP_SAL
+AS SELECT EMP_NAME, SALARY, HIRE_DATE
+   FROM EMPLOYEE;
+
+SELECT * FROM USER_VIEWS;
+
+-- 2) NOFORCE / FORCE
+-- TEST 테이블을 생성한 이후부터 VIEW를 생성할 수 있다.
+CREATE /* NOFORCE */ VIEW V_TEST_01
+AS SELECT *
+   FROM TEST;
+
+-- TEST 테이블을 생성하지 않아도 VIEW를 생성할 수 있다.
+CREATE FORCE VIEW V_TEST_02
+AS SELECT *
+   FROM TEST;
+   
+SELECT * FROM USER_VIEWS;
+
+-- 단, TEST 테이블을 생성한 이후부터 VIEW 조회 가능
+SELECT * FROM V_TEST_02;
+
+CREATE TABLE TEST(
+    TNO NUMBER,
+    TNAME VARCHAR2(20)
+); 
+
+SELECT * FROM V_TEST_01;
+
+-- 3) WITH CHECK OPTION
+CREATE VIEW V_EMP
+AS SELECT *
+   FROM EMPLOYEE
+   WHERE SALARY >= 3000000;
+
+-- 사번이 200인 사원의 급여를 200만원으로 변경
+-- 서브 쿼리의 조건에 부합하지 않아도 변경이 가능하다.
+UPDATE V_EMP
+SET SALARY = 2000000
+WHERE EMP_ID = '200';
+
+SELECT * FROM V_EMP;
+SELECT * FROM EMPLOYEE;
+
+CREATE OR REPLACE VIEW V_EMP
+AS SELECT *
+   FROM EMPLOYEE
+   WHERE SALARY >= 3000000
+WITH CHECK OPTION;
+
+-- 사번이 200인 사원의 급여를 200만원으로 변경
+-- 서브 쿼리의 조건에 부합하지 않기 때문에 변경이 불가능하다.
+UPDATE V_EMP
+SET SALARY = 2000000
+WHERE EMP_ID = '200';
+
+-- 사번이 200인 사원의 급여를 400만원으로 변경
+-- 서브 쿼리의 조건에 부합하기 때문에 변경이 가능하다.
+UPDATE V_EMP
+SET SALARY = 4000000
+WHERE EMP_ID = '200';
+
+SELECT * FROM V_EMP;
+
+ROLLBACK;
+
+-- 4) WITH READ ONLY
+CREATE VIEW V_DEPT
+AS SELECT *
+   FROM DEPARTMENT
+WITH READ ONLY;
+
+-- SELECT 
+SELECT * FROM V_DEPT;
+
+-- INSERT
+INSERT INTO V_DEPT VALUES('D0', '개발부', 'L2');
+
+-- UPDATE
+UPDATE V_DEPT
+SET DEPT_TITLE = '개발부'
+WHERE DEPT_ID = 'D1';
+
+-- DELETE
+DELETE
+FROM V_DEPT
+WHERE DEPT_ID = 'D1';
+
+/*
+  6. VIEW 삭제
+*/
+DROP VIEW V_DEPT;
+DROP VIEW V_EMP;
+DROP VIEW V_EMP_DEPT;
+DROP VIEW V_EMP_JOB;
+DROP VIEW V_EMP_SAL;
+DROP VIEW V_JOB;
+DROP VIEW V_TEST_01;
+DROP VIEW V_TEST_02;
